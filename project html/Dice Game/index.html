@@ -1,0 +1,610 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jharkhand AI Trip Planner - Open Source</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --primary-color: #388E3C;
+            --primary-dark: #2A6E2E;
+            --secondary-color: #8BC34A;
+            --background-light: #F8F9FA;
+            --background-dark: #EAEFF2;
+            --text-color: #212121;
+            --subtle-text: #757575;
+            --card-background: #FFFFFF;
+            --border-color: #E0E0E0;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            background: var(--background-dark);
+            color: var(--text-color);
+            min-height: 100vh;
+            padding: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
+            background: var(--card-background);
+            border-radius: 20px;
+            box-shadow: 0 15px 40px var(--shadow-color);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+            position: relative;
+            animation: fadeIn 1s ease-out;
+        }
+
+        header h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .main-content {
+            display: flex;
+            flex-wrap: wrap;
+            padding: 0;
+            position: relative;
+        }
+
+        .form-section {
+            flex: 1;
+            min-width: 350px;
+            padding: 40px;
+            background: var(--background-light);
+            border-right: 1px solid var(--border-color);
+            position: relative;
+        }
+        
+        .form-section h2, .result-section h2 {
+            font-size: 2em;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .form-section p, .result-section p {
+            color: var(--subtle-text);
+            margin-bottom: 25px;
+        }
+
+        .result-section {
+            flex: 2;
+            min-width: 450px;
+            padding: 40px;
+            background: var(--card-background);
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+            animation: slideInLeft 0.5s ease-out;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--primary-dark);
+            transition: color 0.3s ease;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            font-size: 16px;
+            color: var(--text-color);
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            background-color: var(--card-background);
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 4px rgba(56, 142, 60, 0.1);
+        }
+
+        select[multiple] {
+            height: 150px;
+        }
+
+        small {
+            color: var(--subtle-text);
+            font-size: 12px;
+            display: block;
+            margin-top: 5px;
+        }
+
+        button {
+            background: linear-gradient(90deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: 700;
+            width: 100%;
+            transition: transform 0.2s cubic-bezier(0.68, -0.55, 0.27, 1.55), box-shadow 0.3s ease;
+            box-shadow: 0 5px 15px rgba(56, 142, 60, 0.2);
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        button:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px rgba(56, 142, 60, 0.3);
+        }
+        
+        button:hover:before {
+            transform: scale(1);
+        }
+
+        button:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+            transform: scale(0);
+            z-index: -1;
+            border-radius: 12px;
+        }
+
+        button:disabled {
+            background: var(--border-color);
+            color: var(--subtle-text);
+            transform: none;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        #result {
+            min-height: 400px;
+            padding: 30px;
+            background: var(--background-light);
+            border-radius: 15px;
+            border-left: 5px solid var(--primary-color);
+            white-space: pre-wrap;
+            line-height: 1.8;
+            overflow-y: auto;
+            max-height: 70vh;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--primary-dark);
+            font-size: 1.2em;
+            animation: pulse 1.5s infinite;
+        }
+        
+        .loading::after {
+            content: '';
+            display: block;
+            margin-top: 20px;
+            width: 50px;
+            height: 50px;
+            border: 4px solid var(--primary-color);
+            border-top-color: transparent;
+            border-radius: 50%;
+            margin-left: auto;
+            margin-right: auto;
+            animation: spin 1s linear infinite;
+        }
+
+        .api-info {
+            background: #e8f4f8;
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 30px;
+            font-size: 14px;
+            border-left: 5px solid #3498db;
+            color: #333;
+            animation: slideInUp 0.5s ease-out;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+            animation: fadeIn 1s ease-out;
+        }
+
+        .feature {
+            background: var(--background-light);
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .feature:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .feature div {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            line-height: 1;
+        }
+
+        @media (min-width: 768px) {
+            .container {
+                flex-direction: row;
+            }
+            .form-section, .result-section {
+                min-height: 700px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 15px;
+            }
+            .form-section {
+                border-right: none;
+                border-bottom: 1px solid var(--border-color);
+            }
+            
+            header h1 {
+                font-size: 2em;
+            }
+            header {
+                padding: 30px;
+            }
+            .form-section, .result-section {
+                padding: 25px;
+            }
+        }
+
+        .success-message {
+            color: var(--primary-color);
+            font-weight: 700;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .error-message {
+            color: #E53935;
+            font-weight: 700;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideInLeft {
+            from { opacity: 0; transform: translateX(-30px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        @keyframes slideInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><span style="font-size: 1.2em;">🌄</span> Jharkhand AI Trip Planner</h1>
+            <p>Your journey, planned by AI. Privacy-focused & open source.</p>
+        </header>
+
+        <div class="main-content">
+            <div class="form-section">
+                <h2>Plan Your Adventure</h2>
+                <p>Fill in your preferences to generate a personalized itinerary.</p>
+                
+                <form id="tripForm">
+                    <div class="form-group">
+                        <label for="duration">Trip Duration (Days):</label>
+                        <input type="number" id="duration" min="1" max="14" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="interests">Your Interests:</label>
+                        <select id="interests" multiple required>
+                            <option value="waterfalls">Waterfalls & Nature</option>
+                            <option value="culture">Tribal Culture & Heritage</option>
+                            <option value="spiritual">Spiritual & Temples</option>
+                            <option value="wildlife">Wildlife & Safari</option>
+                            <option value="food">Local Food & Cuisine</option>
+                            <option value="relaxation">Relaxation & Scenic Views</option>
+                        </select>
+                        <small>Hold Ctrl/Cmd to select multiple</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="pace">Preferred Pace:</label>
+                        <select id="pace" required>
+                            <option value="relaxed">Relaxed & Leisurely</option>
+                            <option value="moderate">Moderate</option>
+                            <option value="fast">Fast-Paced & Packed</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="budget">Budget Level:</label>
+                        <select id="budget" required>
+                            <option value="budget">Budget Traveler</option>
+                            <option value="mid">Mid-Range</option>
+                            <option value="luxury">Luxury Experience</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="notes">Special Requests:</label>
+                        <textarea id="notes" rows="3" placeholder="Must-see places, traveling with family, dietary restrictions..."></textarea>
+                    </div>
+
+                    <button type="submit" id="generateBtn">
+                        🚀 Generate My Itinerary
+                    </button>
+                </form>
+
+                <div class="api-info">
+                    <strong>ℹ️ Powered by Open Source AI</strong><br>
+                    Using Hugging Face's free API with Mixtral 8x7B model.<br>
+                    No registration or payment required.
+                </div>
+            </div>
+
+            <div class="result-section">
+                <h2>Your Personalized Itinerary</h2>
+                <p>Your AI-generated travel plan will appear here.</p>
+                
+                <div id="result">
+                    <div class="loading" style="animation: none;">Welcome! Fill out the form to generate your perfect Jharkhand itinerary.</div>
+                </div>
+
+                <div class="feature-grid">
+                    <div class="feature">
+                        <div>💰</div>
+                        <strong>Budget Smart</strong>
+                    </div>
+                    <div class="feature">
+                        <div>⏱️</div>
+                        <strong>Time Optimized</strong>
+                    </div>
+                    <div class="feature">
+                        <div>🎯</div>
+                        <strong>Personalized</strong>
+                    </div>
+                    <div class="feature">
+                        <div>🌿</div>
+                        <strong>Eco-Friendly</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const tripForm = document.getElementById('tripForm');
+            const generateBtn = document.getElementById('generateBtn');
+            const resultDiv = document.getElementById('result');
+
+            const API_URL = "https://api-inference.huggingface.co/models/mistralai/Mixtral-8x7B-Instruct-v0.1";
+
+            const mockResponse = `
+**🌄 4-Day Jharkhand Adventure Itinerary**
+
+**Day 1: Arrival in Ranchi - The Capital City**
+* **🕘 9:00 AM:** Arrive at Birsa Munda Airport (IXR)
+* **🕙 10:30 AM:** Check into mid-range hotel (₹2000-3000/night)
+* **🕛 12:00 PM:** Lunch at local restaurant - try Litti Chokha
+* **🕒 3:00 PM:** Visit Rock Garden and Kanke Dam
+* **🕕 6:00 PM:** Explore local markets for handicrafts
+* **🕗 8:00 PM:** Dinner at hotel
+
+**Day 2: Waterfall Circuit - Natural Wonders**
+* **🕘 9:00 AM:** Drive to Dassam Falls (40km from Ranchi)
+* **🕚 11:00 AM:** Explore Dassam Falls and enjoy photography
+* **🕐 1:00 PM:** Picnic lunch near the falls
+* **🕒 3:00 PM:** Visit nearby Jonha Falls (Gautamdhara)
+* **🕕 6:00 PM:** Return to Ranchi
+* **🕗 8:00 PM:** Traditional Jharkhand dinner
+
+**Day 3: Tribal Culture & Hill Station**
+* **🕘 9:00 AM:** Drive to Netarhat (156km, 4 hours)
+* **🕐 1:00 PM:** Check into forest lodge (₹1500-2500/night)
+* **🕒 3:00 PM:** Visit Netarhat viewpoints and pine forests
+* **🕔 5:00 PM:** Experience local tribal culture
+* **🕗 8:00 PM:** Dinner with local cuisine
+
+**Day 4: Nature Walk & Departure**
+* **🕗 8:00 AM:** Morning nature walk in Netarhat
+* **🕙 10:00 AM:** Visit local market for souvenirs
+* **🕛 12:00 PM:** Begin return journey to Ranchi
+* **🕓 4:00 PM:** Arrive at airport for departure
+
+**💰 Estimated Budget: ₹15,000-20,000 per person**
+**🍽️ Must-Try Foods:** Litti Chokha, Thekua, Handia, Bamboo Shoot Curry
+**🎒 Travel Tips:** October-March best season, carry cash, comfortable shoes recommended
+`;
+
+            tripForm.addEventListener('submit', async function(event) {
+                event.preventDefault();
+                generateBtn.disabled = true;
+                generateBtn.textContent = 'Generating...';
+                resultDiv.innerHTML = '<div class="loading"></div>';
+
+                const duration = document.getElementById('duration').value;
+                const interestsElement = document.getElementById('interests');
+                const interests = Array.from(interestsElement.selectedOptions).map(option => option.value);
+                const pace = document.getElementById('pace').value;
+                const budget = document.getElementById('budget').value;
+                const notes = document.getElementById('notes').value;
+
+                const prompt = `Create a detailed ${duration}-day travel itinerary for Jharkhand, India.
+
+Traveler Preferences:
+- Interests: ${interests.join(', ')}
+- Pace: ${pace}
+- Budget: ${budget}
+- Special Requests: ${notes || 'None'}
+
+Please include:
+1. Day-by-day schedule with specific timings
+2. Key attractions in Jharkhand (waterfalls, cultural sites, nature spots)
+3. Travel time between locations
+4. Meal suggestions with local cuisine
+5. Accommodation recommendations
+6. Practical tips and budget estimates
+7. Cultural insights and safety advice
+
+Format with clear headings and bullet points for easy reading.`;
+
+                try {
+                    const response = await fetch(API_URL, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            inputs: prompt,
+                            parameters: {
+                                max_new_tokens: 1200,
+                                temperature: 0.7,
+                                return_full_text: false
+                            }
+                        })
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`API error: ${response.status}`);
+                    }
+
+                    const data = await response.json();
+                    
+                    if (data && data[0] && data[0].generated_text) {
+                        const itineraryText = data[0].generated_text;
+                        resultDiv.innerHTML = `
+                            <div class="success-message">✅ Itinerary Generated Successfully!</div>
+                            <div style="margin-top: 20px;">${itineraryText}</div>
+                        `;
+                    } else {
+                        throw new Error('Invalid response format from AI');
+                    }
+
+                } catch (error) {
+                    console.error("Error:", error);
+                    resultDiv.innerHTML = `
+                        <div class="error-message">⚠️ AI service temporarily unavailable. Showing sample itinerary:</div>
+                        <div style="margin-top: 20px;">${mockResponse}</div>
+                    `;
+                } finally {
+                    generateBtn.disabled = false;
+                    generateBtn.textContent = '🚀 Generate My Itinerary';
+                }
+            });
+
+            const inputs = document.querySelectorAll('input, select, textarea');
+            inputs.forEach(input => {
+                input.addEventListener('focus', () => {
+                    input.style.boxShadow = '0 0 0 4px rgba(56, 142, 60, 0.2)';
+                });
+                input.addEventListener('blur', () => {
+                    input.style.boxShadow = 'none';
+                });
+            });
+        });
+    </script>
+<!-- Code injected by live-server -->
+<script>
+	// <![CDATA[  <-- For SVG support
+	if ('WebSocket' in window) {
+		(function () {
+			function refreshCSS() {
+				var sheets = [].slice.call(document.getElementsByTagName("link"));
+				var head = document.getElementsByTagName("head")[0];
+				for (var i = 0; i < sheets.length; ++i) {
+					var elem = sheets[i];
+					var parent = elem.parentElement || head;
+					parent.removeChild(elem);
+					var rel = elem.rel;
+					if (elem.href && typeof rel != "string" || rel.length == 0 || rel.toLowerCase() == "stylesheet") {
+						var url = elem.href.replace(/(&|\?)_cacheOverride=\d+/, '');
+						elem.href = url + (url.indexOf('?') >= 0 ? '&' : '?') + '_cacheOverride=' + (new Date().valueOf());
+					}
+					parent.appendChild(elem);
+				}
+			}
+			var protocol = window.location.protocol === 'http:' ? 'ws://' : 'wss://';
+			var address = protocol + window.location.host + window.location.pathname + '/ws';
+			var socket = new WebSocket(address);
+			socket.onmessage = function (msg) {
+				if (msg.data == 'reload') window.location.reload();
+				else if (msg.data == 'refreshcss') refreshCSS();
+			};
+			if (sessionStorage && !sessionStorage.getItem('IsThisFirstTime_Log_From_LiveServer')) {
+				console.log('Live reload enabled.');
+				sessionStorage.setItem('IsThisFirstTime_Log_From_LiveServer', true);
+			}
+		})();
+	}
+	else {
+		console.error('Upgrade your browser. This Browser is NOT supported WebSocket for Live-Reloading.');
+	}
+	// ]]>
+</script>
+</body>
+</html>
